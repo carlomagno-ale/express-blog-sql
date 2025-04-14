@@ -8,8 +8,6 @@ const credentials = {
     port: process.env.DB_PORT,
 }
 
-console.log(credentials)
-
 const connection = mysql.createConnection(credentials)
 
 connection.connect((err) => {
