@@ -1,6 +1,6 @@
 const connection = require('../data/db')
 
-const posts = require('../data/posts-data');
+//const posts = require('../data/posts-data');
 
 function index(req, res) {
 
@@ -12,22 +12,35 @@ function index(req, res) {
     });
 
 }
-function show(req, res) {
-    const slug = req.params.slug
-    // cerchiamo 
-    const postSingle = posts.find(postSingle => postSingle.slug === slug);
-    // Restituiamolo sotto forma di JSON
 
-    if (!postSingle) {
-        res.status(404);
-        return res.json({
-            error: "Not Found",
-            message: "post non trovato"
-        })
-    }
-
-    res.json(postSingle);
+function destroy(req, res) {
+    // id dall' URL
+    const { id } = req.params;
+    // Eliminiamo
+    connection.query('DELETE FROM posts WHERE id = ?', [id], (err) => {
+        if (err) return res.status(500).json({ error: 'Post NON rimosso' });
+        console.log(`Post con ID ${id} è stato cancellato.`);
+        res.sendStatus(204)
+    });
 }
+
+function show(req, res) {
+
+    const { id } = req.params;
+
+    console.log(`ID: ${id}`);
+
+    const sql = 'SELECT * FROM posts WHERE id = ?';
+
+    connection.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Database query failed' });
+        if (results.length === 0) return res.status(404).json({ error: 'Post non trovato' });
+        res.json(results[0]);
+    });
+}
+
+
+//non modificati
 function store(req, res) {
 
     // Creiamo un nuovo oggetto 
@@ -45,10 +58,8 @@ function store(req, res) {
     // Restituiamo lo status corretto + il post creato
     res.status(201);
     res.json(newPost);
-
-    /*console.log(req.body);
-    res.send('crea un nuovo post')*/
 }
+
 function update(req, res) {
 
     // recuperiamo lo slug 
@@ -104,27 +115,6 @@ function modify(req, res) {
     //res.send(`modifica parzialmente un post con id ${req.params.slug}`)
 }
 
-function destroy(req, res) {
-
-    const slug = req.params.slug;
-
-    const postSingle = posts.find(postSingle => postSingle.slug === slug);
-
-    // controllo
-    if (!postSingle) {
-        res.status(404);
-        return res.json({
-            status: 404,
-            error: "Not Found",
-            message: "post non trovato"
-        })
-    }
-    // Rimuoviamo il post
-    posts.splice(posts.indexOf(postSingle), 1);
-    // Restituiamo lo status corretto
-    res.sendStatus(204)
-    console.log(posts);
-}
 
 module.exports = {
     index,
