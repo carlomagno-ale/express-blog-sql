@@ -1,3 +1,5 @@
+const connection = require('../data/db')
+
 const posts = require('../data/posts-data');
 
 
